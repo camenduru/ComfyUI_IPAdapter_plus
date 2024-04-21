@@ -18,7 +18,7 @@ except ImportError:
 
 from image_proj_models import MLPProjModel, MLPProjModelFaceId, ProjModelFaceIdPlus, Resampler, ImageProjModel
 from CrossAttentionPatch import CrossAttentionPatch
-from utils import (
+from IPAdapterPlus_utils import (
     encode_image_masked,
     tensor_to_size,
     contrast_adaptive_sharpening,

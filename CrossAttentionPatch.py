@@ -2,7 +2,7 @@ import torch
 import math
 import torch.nn.functional as F
 from totoro.ldm.modules.attention import optimized_attention
-from utils import tensor_to_size
+from IPAdapterPlus_utils import tensor_to_size
 
 class CrossAttentionPatch:
     # forward for patching

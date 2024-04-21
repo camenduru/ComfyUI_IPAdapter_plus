@@ -3,11 +3,11 @@ import os
 import math
 import folder_paths
 
-import comfy.model_management as model_management
+import totoro.model_management as model_management
 from node_helpers import conditioning_set_values, conditioning_set_values
-from comfy.clip_vision import load as load_clip_vision
-from comfy.sd import load_lora_for_models
-import comfy.utils
+from totoro.clip_vision import load as load_clip_vision
+from totoro.sd import load_lora_for_models
+import totoro.utils
 
 import torch.nn as nn
 from PIL import Image
@@ -168,7 +168,7 @@ def ipadapter_execute(model,
     device = model_management.get_torch_device()
     dtype = model_management.unet_dtype()
     if dtype not in [torch.float32, torch.float16, torch.bfloat16]:
-        dtype = torch.float16 if comfy.model_management.should_use_fp16() else torch.float32
+        dtype = torch.float16 if totoro.model_management.should_use_fp16() else torch.float32
 
     is_full = "proj.3.weight" in ipadapter["image_proj"]
     is_portrait = "proj.2.weight" in ipadapter["image_proj"] and not "proj.3.weight" in ipadapter["image_proj"] and not "0.to_q_lora.down.weight" in ipadapter["ip_adapter"]
@@ -447,7 +447,7 @@ class IPAdapterUnifiedLoader:
                 self.clipvision = pipeline['clipvision']
 
         # 2. Load the ipadapter model
-        is_sdxl = isinstance(model.model, (comfy.model_base.SDXL, comfy.model_base.SDXLRefiner, comfy.model_base.SDXL_instructpix2pix))
+        is_sdxl = isinstance(model.model, (totoro.model_base.SDXL, totoro.model_base.SDXLRefiner, totoro.model_base.SDXL_instructpix2pix))
         ipadapter_file, is_insightface, lora_pattern = get_ipadapter_file(preset, is_sdxl)
         if ipadapter_file is None:
             raise Exception("IPAdapter model not found.")
@@ -475,7 +475,7 @@ class IPAdapterUnifiedLoader:
                     torch.cuda.empty_cache()
 
             if lora_model is None:
-                lora_model = comfy.utils.load_torch_file(lora_file, safe_load=True)
+                lora_model = totoro.utils.load_torch_file(lora_file, safe_load=True)
                 self.lora = { 'file': lora_file, 'model': lora_model }
                 print(f"\033[33mINFO: LoRA model loaded from {lora_file}\033[0m")
 
@@ -634,7 +634,7 @@ class IPAdapterAdvanced:
     CATEGORY = "ipadapter"
 
     def apply_ipadapter(self, model, ipadapter, start_at=0.0, end_at=1.0, weight=1.0, weight_style=1.0, weight_composition=1.0, expand_style=False, weight_type="linear", combine_embeds="concat", weight_faceidv2=None, image=None, image_style=None, image_composition=None, image_negative=None, clip_vision=None, attn_mask=None, insightface=None, embeds_scaling='V only', layer_weights=None, ipadapter_params=None):
-        is_sdxl = isinstance(model.model, (comfy.model_base.SDXL, comfy.model_base.SDXLRefiner, comfy.model_base.SDXL_instructpix2pix))
+        is_sdxl = isinstance(model.model, (totoro.model_base.SDXL, totoro.model_base.SDXLRefiner, totoro.model_base.SDXL_instructpix2pix))
 
         if 'ipadapter' in ipadapter:
             ipadapter_model = ipadapter['ipadapter']['model']
@@ -1479,76 +1479,3 @@ class IPAdapterCombineParams:
             ipadapter_params["end_at"] += params_5["end_at"]
 
         return (ipadapter_params, )
-
-"""
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- Register
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-"""
-NODE_CLASS_MAPPINGS = {
-    # Main Apply Nodes
-    "IPAdapter": IPAdapterSimple,
-    "IPAdapterAdvanced": IPAdapterAdvanced,
-    "IPAdapterBatch": IPAdapterBatch,
-    "IPAdapterFaceID": IPAdapterFaceID,
-    "IPAAdapterFaceIDBatch": IPAAdapterFaceIDBatch,
-    "IPAdapterTiled": IPAdapterTiled,
-    "IPAdapterTiledBatch": IPAdapterTiledBatch,
-    "IPAdapterEmbeds": IPAdapterEmbeds,
-    "IPAdapterStyleComposition": IPAdapterStyleComposition,
-    "IPAdapterStyleCompositionBatch": IPAdapterStyleCompositionBatch,
-    "IPAdapterMS": IPAdapterMS,
-    "IPAdapterFromParams": IPAdapterFromParams,
-
-    # Loaders
-    "IPAdapterUnifiedLoader": IPAdapterUnifiedLoader,
-    "IPAdapterUnifiedLoaderFaceID": IPAdapterUnifiedLoaderFaceID,
-    "IPAdapterModelLoader": IPAdapterModelLoader,
-    "IPAdapterInsightFaceLoader": IPAdapterInsightFaceLoader,
-    "IPAdapterUnifiedLoaderCommunity": IPAdapterUnifiedLoaderCommunity,
-
-    # Helpers
-    "IPAdapterEncoder": IPAdapterEncoder,
-    "IPAdapterCombineEmbeds": IPAdapterCombineEmbeds,
-    "IPAdapterNoise": IPAdapterNoise,
-    "PrepImageForClipVision": PrepImageForClipVision,
-    "IPAdapterSaveEmbeds": IPAdapterSaveEmbeds,
-    "IPAdapterLoadEmbeds": IPAdapterLoadEmbeds,
-    "IPAdapterWeights": IPAdapterWeights,
-    "IPAdapterRegionalConditioning": IPAdapterRegionalConditioning,
-    "IPAdapterCombineParams": IPAdapterCombineParams,
-}
-
-NODE_DISPLAY_NAME_MAPPINGS = {
-    # Main Apply Nodes
-    "IPAdapter": "IPAdapter",
-    "IPAdapterAdvanced": "IPAdapter Advanced",
-    "IPAdapterBatch": "IPAdapter Batch (Adv.)",
-    "IPAdapterFaceID": "IPAdapter FaceID",
-    "IPAAdapterFaceIDBatch": "IPAdapter FaceID Batch",
-    "IPAdapterTiled": "IPAdapter Tiled",
-    "IPAdapterTiledBatch": "IPAdapter Tiled Batch",
-    "IPAdapterEmbeds": "IPAdapter Embeds",
-    "IPAdapterStyleComposition": "IPAdapter Style & Composition SDXL",
-    "IPAdapterStyleCompositionBatch": "IPAdapter Style & Composition Batch SDXL",
-    "IPAdapterMS": "IPAdapter Mad Scientist",
-    "IPAdapterFromParams": "IPAdapter from Params",
-
-    # Loaders
-    "IPAdapterUnifiedLoader": "IPAdapter Unified Loader",
-    "IPAdapterUnifiedLoaderFaceID": "IPAdapter Unified Loader FaceID",
-    "IPAdapterModelLoader": "IPAdapter Model Loader",
-    "IPAdapterInsightFaceLoader": "IPAdapter InsightFace Loader",
-    "IPAdapterUnifiedLoaderCommunity": "IPAdapter Unified Loader Community",
-
-    # Helpers
-    "IPAdapterEncoder": "IPAdapter Encoder",
-    "IPAdapterCombineEmbeds": "IPAdapter Combine Embeds",
-    "IPAdapterNoise": "IPAdapter Noise",
-    "PrepImageForClipVision": "Prep Image For ClipVision",
-    "IPAdapterSaveEmbeds": "IPAdapter Save Embeds",
-    "IPAdapterLoadEmbeds": "IPAdapter Load Embeds",
-    "IPAdapterWeights": "IPAdapter Weights",
-    "IPAdapterRegionalConditioning": "IPAdapter Regional Conditioning",
-    "IPAdapterCombineParams": "IPAdapter Combine Params",
-}

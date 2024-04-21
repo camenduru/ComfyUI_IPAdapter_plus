@@ -1,7 +1,7 @@
 import torch
 import math
 import torch.nn.functional as F
-from comfy.ldm.modules.attention import optimized_attention
+from totoro.ldm.modules.attention import optimized_attention
 from .utils import tensor_to_size
 
 class CrossAttentionPatch:

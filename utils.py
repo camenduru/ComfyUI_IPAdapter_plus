@@ -2,9 +2,9 @@ import re
 import torch
 import os
 import folder_paths
-from comfy.clip_vision import clip_preprocess, Output
-import comfy.utils
-import comfy.model_management as model_management
+from totoro.clip_vision import clip_preprocess, Output
+import totoro.utils
+import totoro.model_management as model_management
 try:
     import torchvision.transforms.v2 as T
 except ImportError:
@@ -120,7 +120,7 @@ def get_lora_file(pattern):
     return lora_file
 
 def ipadapter_model_loader(file):
-    model = comfy.utils.load_torch_file(file, safe_load=True)
+    model = totoro.utils.load_torch_file(file, safe_load=True)
 
     if file.lower().endswith(".safetensors"):
         st_model = {"image_proj": {}, "ip_adapter": {}}

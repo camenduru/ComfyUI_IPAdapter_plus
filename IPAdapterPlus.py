@@ -434,8 +434,7 @@ class IPAdapterUnifiedLoader:
             pipeline = ipadapter
 
         # 1. Load the clipvision model
-        # clipvision_file = get_clipvision_file(preset)
-        clipvision_file = preset
+        clipvision_file = get_clipvision_file(preset)
         if clipvision_file is None:
             raise Exception("ClipVision model not found.")
 
